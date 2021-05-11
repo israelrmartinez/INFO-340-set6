@@ -20,8 +20,6 @@ const EXAMPLE_SEARCH_RESULTS = {results:[{
 }]};
 console.log(EXAMPLE_SEARCH_RESULTS.results[2].trackName + " by " + EXAMPLE_SEARCH_RESULTS.results[2].artistName);
 
-let recordsDiv = document.querySelector('#records');
-
 //For practice, define a function `renderTrack()` that takes as an argument an
 //Object representing a SINGLE song track (like an element of the above array) 
 //and adds a new DOM element to the `#records` div representing that track. The 
@@ -37,13 +35,17 @@ let recordsDiv = document.querySelector('#records');
 //(e.g., `EXAMPLE_SEARCH_RESULTS.results[0]).
 function renderTrack(record) {
 	let recordImg = document.createElement('img');
-	recordImg.src = record.artworkUrl100;
-	recordImg.alt = record.trackName + " by " + record.artistName;
-	recordImg.title = record.trackName;
-
+	let recordsDiv = document.querySelector('#records');
+	recordImg.setAttribute('src', record.artworkUrl100);
+	recordImg.setAttribute('alt', record.trackName + " by " + record.artistName);
+	recordImg.setAttribute('title', record.trackName);
+	
+	// recordImg.src = record.artworkUrl100;
+	// recordImg.alt = record.trackName + " by " + record.artistName;
+	// recordImg.title = record.trackName;
 	recordsDiv.appendChild(recordImg);
 }
-
+console.log(renderTrack(EXAMPLE_SEARCH_RESULTS.results[1]));
 
 //Define a function `renderSearchResults()` that takes in an object with a
 //`results` property containing an array of music tracks; the same format as
@@ -58,9 +60,8 @@ function renderTrack(record) {
 //    array is empty, you instead call the `renderError()` function and pass
 //    it an new Error object: `new Error("No results found")`
 function renderSearchResults(search) {
-	recordsDiv.textContent = "";
-	
-	if (search.results.length == 0) {
+	document.querySelector('#records').textContent = "";
+	if (search.results.length == 0 || search.results == undefined) {
 		renderError(new Error("No results found"));
 	} else {
 		for (let i = 0; i < search.results.length; i++) {
@@ -68,7 +69,6 @@ function renderSearchResults(search) {
 		}
 	}
 }
-renderSearchResults(EXAMPLE_SEARCH_RESULTS);
 
 
 //Now it's the time to practice using `fetch()`! First, modify the `index.html`
@@ -141,11 +141,13 @@ function renderError(error) {
 	let message = document.createElement('p');
 	message.setAttribute('class', 'alert alert-danger');
 	message.textContent = error;
+	let recordsDiv = document.querySelector('#records');
+	
 	recordsDiv.appendChild(message);
 }
 
 
-//Add the error handing to your program in two ways (see above):
+//Add the error handing to your program in two ways (see ERROR-HANDLING above):
 //
 //You can test this error handling by trying to search with an empty query.
 
