@@ -18,7 +18,6 @@ const EXAMPLE_SEARCH_RESULTS = {results:[{
     previewUrl: "https://audio-ssl.itunes.apple.com/apple-assets-us-std-000001/AudioPreview122/v4/5f/d7/5f/5fd75fd8-d0a5-ccb2-7822-bcaedee070fc/mzaf_3356445145838692600.plus.aac.p.m4a",
     artworkUrl100: "http://is1.mzstatic.com/image/thumb/Music20/v4/23/c1/9e/23c19e53-783f-ae47-7212-03cc9998bd84/source/100x100bb.jpg",
 }]};
-console.log(EXAMPLE_SEARCH_RESULTS.results[2].trackName + " by " + EXAMPLE_SEARCH_RESULTS.results[2].artistName);
 
 //For practice, define a function `renderTrack()` that takes as an argument an
 //Object representing a SINGLE song track (like an element of the above array) 
@@ -36,16 +35,13 @@ console.log(EXAMPLE_SEARCH_RESULTS.results[2].trackName + " by " + EXAMPLE_SEARC
 function renderTrack(record) {
 	let recordImg = document.createElement('img');
 	let recordsDiv = document.querySelector('#records');
-	recordImg.setAttribute('src', record.artworkUrl100);
-	recordImg.setAttribute('alt', record.trackName + " by " + record.artistName);
-	recordImg.setAttribute('title', record.trackName);
 	
-	// recordImg.src = record.artworkUrl100;
-	// recordImg.alt = record.trackName + " by " + record.artistName;
-	// recordImg.title = record.trackName;
+	recordImg.src = record.artworkUrl100;
+	recordImg.alt = record.trackName + " by " + record.artistName;
+	recordImg.title = record.trackName;
 	recordsDiv.appendChild(recordImg);
 }
-console.log(renderTrack(EXAMPLE_SEARCH_RESULTS.results[1]));
+
 
 //Define a function `renderSearchResults()` that takes in an object with a
 //`results` property containing an array of music tracks; the same format as
@@ -69,7 +65,6 @@ function renderSearchResults(search) {
 		}
 	}
 }
-
 
 //Now it's the time to practice using `fetch()`! First, modify the `index.html`
 //file to load the polyfills for _BOTH_ the fetch() function and Promises, so
@@ -105,18 +100,17 @@ function fetchTrackList(searchTerm) {
 	togglerSpinner();
 	
 	let url = URL_TEMPLATE.replace("{searchTerm}", searchTerm);
-	fetch(url)
-		.then(function(response) {
-			let dataPromise = response.json();
-			return dataPromise;
+	let promise = fetch(url);
+
+	return promise.then(function(response) {
+			return response.json();
 		})
 		.then(function(data) {
 			renderSearchResults(data);
+			togglerSpinner();
 		})
-		.catch(function(error) {
-			renderError(error);
-		})
-		.then(function() {
+		.catch(function() {
+			renderError(new Error("Could not fetch data"));
 			togglerSpinner();
 		});
 }
@@ -140,10 +134,10 @@ button.addEventListener('click', function(event) {
 function renderError(error) {
 	let message = document.createElement('p');
 	message.setAttribute('class', 'alert alert-danger');
-	message.textContent = error;
+	message.textContent = error.message;
 	let recordsDiv = document.querySelector('#records');
 	
-	recordsDiv.appendChild(message);
+	recordsDiv.append(message);
 }
 
 
@@ -159,7 +153,6 @@ function renderError(error) {
 //Use the `classList.toggle()` method (or `.toggleClass()` with jQuery) to 
 //toggle the presence of the `d-none` class.
 let spinner = document.getElementsByClassName('fa-spinner')[0];
-console.log(spinner);
 
 function togglerSpinner() {
 	spinner.classList.toggle('d-none');
