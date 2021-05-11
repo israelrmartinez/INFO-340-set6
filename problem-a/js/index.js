@@ -18,7 +18,9 @@ const EXAMPLE_SEARCH_RESULTS = {results:[{
     previewUrl: "https://audio-ssl.itunes.apple.com/apple-assets-us-std-000001/AudioPreview122/v4/5f/d7/5f/5fd75fd8-d0a5-ccb2-7822-bcaedee070fc/mzaf_3356445145838692600.plus.aac.p.m4a",
     artworkUrl100: "http://is1.mzstatic.com/image/thumb/Music20/v4/23/c1/9e/23c19e53-783f-ae47-7212-03cc9998bd84/source/100x100bb.jpg",
 }]};
+console.log(EXAMPLE_SEARCH_RESULTS.results[2].trackName + " by " + EXAMPLE_SEARCH_RESULTS.results[2].artistName);
 
+let recordsDiv = document.querySelector('#records');
 
 //For practice, define a function `renderTrack()` that takes as an argument an
 //Object representing a SINGLE song track (like an element of the above array) 
@@ -33,7 +35,14 @@ const EXAMPLE_SEARCH_RESULTS = {results:[{
 //
 //You can test this function by passing it one of the above array items
 //(e.g., `EXAMPLE_SEARCH_RESULTS.results[0]).
+function renderTrack(record) {
+	let recordImg = document.createElement('img');
+	recordImg.src = record.artworkUrl100;
+	recordImg.alt = record.trackName + " by " + record.artistName;
+	recordImg.title = record.trackName;
 
+	recordsDiv.appendChild(recordImg);
+}
 
 
 //Define a function `renderSearchResults()` that takes in an object with a
@@ -44,7 +53,22 @@ const EXAMPLE_SEARCH_RESULTS = {results:[{
 //"clear" the previously displayed results first!
 //
 //You can test this function by passing it the `EXAMPLE_SEARCH_RESULTS` object.
-
+// ERROR-HANDLING
+//(2) Modify the above `renderSearchResults()` function so that if the `results`
+//    array is empty, you instead call the `renderError()` function and pass
+//    it an new Error object: `new Error("No results found")`
+function renderSearchResults(search) {
+	recordsDiv.textContent = "";
+	
+	if (search.results.length == 0) {
+		renderError(new Error("No results found"));
+	} else {
+		for (let i = 0; i < search.results.length; i++) {
+			renderTrack(search.results[i]);
+		}
+	}
+}
+renderSearchResults(EXAMPLE_SEARCH_RESULTS);
 
 
 //Now it's the time to practice using `fetch()`! First, modify the `index.html`
@@ -67,31 +91,61 @@ const EXAMPLE_SEARCH_RESULTS = {results:[{
 //
 //You can test this function by calling the method and passing it the name of 
 //your favorite band (you CANNOT test it with the search button yet!)
+// ERROR-HANDLING
+//(1) Add a `.catch()` callback to the AJAX call in `fetchTrackList()` that
+//    will render the error if one occurs in downloading or parsing.
+// ADD TOGGLER
+//Modify the `fetchTrackList()` function once again so that you toggle the
+//spinner (show it) BEFORE you send the AJAX request, and toggle it back off
+//after the ENTIRE request is completed (including after any error catching---
+//download the data and `catch()` the error, and `then()` show the spinner.
 const URL_TEMPLATE = "https://itunes.apple.com/search?limit=25&term={searchTerm}";
 
-
-
+function fetchTrackList(searchTerm) {
+	togglerSpinner();
+	
+	let url = URL_TEMPLATE.replace("{searchTerm}", searchTerm);
+	fetch(url)
+		.then(function(response) {
+			let dataPromise = response.json();
+			return dataPromise;
+		})
+		.then(function(data) {
+			renderSearchResults(data);
+		})
+		.catch(function(error) {
+			renderError(error);
+		})
+		.then(function() {
+			togglerSpinner();
+		});
+}
 
 //Add an event listener to the "search" button so that when it is clicked (and 
 //the the form is submitted) your `fetchTrackList()` function is called with the
 //user-entered `#searchQuery` value. Use the `preventDefault()` function to keep
 //the form from being submitted as usual (and navigating to a different page).
-
+let button = document.querySelector('button');
+button.addEventListener('click', function(event) {
+	event.preventDefault();
+	let searchQuery = document.querySelector('#searchQuery');
+	fetchTrackList(searchQuery.value);
+});
 
 
 //Next, add some error handling to the page. Define a function `renderError()`
 //that takes in an "Error object" and displays that object's `message` property
 //on the page. Display this by creating a `<p class="alert alert-danger">` and
 //placing that alert inside the `#records` element.
+function renderError(error) {
+	let message = document.createElement('p');
+	message.setAttribute('class', 'alert alert-danger');
+	message.textContent = error;
+	recordsDiv.appendChild(message);
+}
 
 
-
-//Add the error handing to your program in two ways:
-//(1) Add a `.catch()` callback to the AJAX call in `fetchTrackList()` that
-//    will render the error if one occurs in downloading or parsing.
-//(2) Modify the above `renderSearchResults()` function so that if the `results`
-//    array is empty, you instead call the `renderError()` function and pass
-//    it an new Error object: `new Error("No results found")`
+//Add the error handing to your program in two ways (see above):
 //
 //You can test this error handling by trying to search with an empty query.
 
@@ -102,12 +156,12 @@ const URL_TEMPLATE = "https://itunes.apple.com/search?limit=25&term={searchTerm}
 //so that it is displayed if currently hidden, or hidden if currently displayed.
 //Use the `classList.toggle()` method (or `.toggleClass()` with jQuery) to 
 //toggle the presence of the `d-none` class.
-//
-//Modify the `fetchTrackList()` function once again so that you toggle the
-//spinner (show it) BEFORE you send the AJAX request, and toggle it back off
-//after the ENTIRE request is completed (including after any error catching---
-//download the data and `catch()` the error, and `then()` show the spinner.
+let spinner = document.getElementsByClassName('fa-spinner')[0];
+console.log(spinner);
 
+function togglerSpinner() {
+	spinner.classList.toggle('d-none');
+}
 
 
 
